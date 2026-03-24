@@ -1,0 +1,281 @@
+generator client {
+  provider = "prisma-client-js"
+  }
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+enum Role {
+  ADMIN
+  TEACHER
+  PARENT
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(PARENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  teacher   Teacher?
+  parent    Parent?
+}
+
+model AcademicYear {
+  id        String   @id @default(cuid())
+  name      String
+  startDate DateTime
+  endDate   DateTime
+  isCurrent Boolean  @default(false)
+  createdAt DateTime @default(now())
+  classes       Class[]
+  feeStructures FeeStructure[]
+  timetables    Timetable[]
+}
+
+model Class {
+  id             String       @id @default(cuid())
+  name           String
+  section        String
+  academicYearId String
+  academicYear   AcademicYear @relation(fields: [academicYearId], references: [id])
+  createdAt      DateTime     @default(now())
+  students    Student[]
+  subjects    Subject[]
+  attendances Attendance[]
+  timetables  Timetable[]
+}
+
+model Subject {
+  id        String   @id @default(cuid())
+  name      String
+  code      String
+  classId   String
+  teacherId String?
+  createdAt DateTime @default(now())
+  class      Class    @relation(fields: [classId], references: [id])
+  teacher    Teacher? @relation(fields: [teacherId], references: [id])
+  grades     Grade[]
+  timetables Timetable[]
+}
+
+model Student {
+  id          String   @id @default(cuid())
+  studentId   String   @unique
+  firstName   String
+  lastName    String
+  dateOfBirth DateTime
+  gender      String
+  address     String?
+  phone       String?
+  photo       String?
+  classId     String
+  parentId    String?
+  enrolledAt  DateTime @default(now())
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  class       Class    @relation(fields: [classId], references: [id])
+  parent      Parent?  @relation(fields: [parentId], references: [id])
+  attendances Attendance[]
+  grades      Grade[]
+  feePayments FeePayment[]
+  bookIssues  BookIssue[]
+}
+
+model Parent {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  phone     String
+  address   String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  students  Student[]
+}
+
+model Teacher {
+  id            String   @id @default(cuid())
+  employeeId    String   @unique
+  userId        String   @unique
+  phone         String
+  address       String?
+  qualification String?
+  joiningDate   DateTime
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id])
+  subjects      Subject[]
+  attendances   Attendance[]
+  timetables    Timetable[]
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
+model Attendance {
+  id        String           @id @default(cuid())
+  studentId String
+  classId   String
+  teacherId String
+  date      DateTime
+  status    AttendanceStatus @default(PRESENT)
+  remarks   String?
+  createdAt DateTime         @default(now())
+  student   Student @relation(fields: [studentId], references: [id])
+  class     Class   @relation(fields: [classId], references: [id])
+  teacher   Teacher @relation(fields: [teacherId], references: [id])
+  @@unique([studentId, date])
+}
+
+enum ExamType {
+  QUIZ
+  MIDTERM
+  FINAL
+  ASSIGNMENT
+  PROJECT
+}
+
+model Exam {
+  id         String   @id @default(cuid())
+  name       String
+  type       ExamType
+  totalMarks Float
+  date       DateTime
+  createdAt  DateTime @default(now())
+  grades     Grade[]
+}
+
+model Grade {
+  id        String   @id @default(cuid())
+  studentId String
+  subjectId String
+  examId    String
+  marks     Float
+  grade     String?
+  remarks   String?
+  createdAt DateTime @default(now())
+  student   Student @relation(fields: [studentId], references: [id])
+  subject   Subject @relation(fields: [subjectId], references: [id])
+  exam      Exam    @relation(fields: [examId], references: [id])
+  @@unique([studentId, subjectId, examId])
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+}
+
+model Timetable {
+  id             String       @id @default(cuid())
+  classId        String
+  subjectId      String
+  teacherId      String
+  academicYearId String
+  day            DayOfWeek
+  startTime      String
+  endTime        String
+  room           String?
+  createdAt      DateTime     @default(now())
+  class        Class        @relation(fields: [classId], references: [id])
+  subject      Subject      @relation(fields: [subjectId], references: [id])
+  teacher      Teacher      @relation(fields: [teacherId], references: [id])
+  academicYear AcademicYear @relation(fields: [academicYearId], references: [id])
+}
+
+enum FeeType {
+  TUITION
+  TRANSPORT
+  LIBRARY
+  SPORTS
+  EXAM
+  OTHER
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  PARTIAL
+  OVERDUE
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  ONLINE
+  CHEQUE
+}
+
+model FeeStructure {
+  id             String       @id @default(cuid())
+  name           String
+  type           FeeType
+  amount         Float
+  dueDate        DateTime
+  academicYearId String
+  createdAt      DateTime     @default(now())
+  academicYear AcademicYear @relation(fields: [academicYearId], references: [id])
+  payments     FeePayment[]
+}
+
+model FeePayment {
+  id             String        @id @default(cuid())
+  studentId      String
+  feeStructureId String
+  amountPaid     Float
+  paymentDate    DateTime
+  method         PaymentMethod @default(CASH)
+  status         PaymentStatus @default(PENDING)
+  receiptNumber  String        @unique
+  remarks        String?
+  createdAt      DateTime      @default(now())
+  student      Student      @relation(fields: [studentId], references: [id])
+  feeStructure FeeStructure @relation(fields: [feeStructureId], references: [id])
+}
+
+enum BookStatus {
+  AVAILABLE
+  ISSUED
+  LOST
+  DAMAGED
+}
+
+model Book {
+  id          String   @id @default(cuid())
+  title       String
+  author      String
+  isbn        String?  @unique
+  category    String
+  publisher   String?
+  totalCopies Int      @default(1)
+  available   Int      @default(1)
+  shelfNumber String?
+  createdAt   DateTime @default(now())
+  issues      BookIssue[]
+}
+
+model BookIssue {
+  id         String     @id @default(cuid())
+  bookId     String
+  studentId  String
+  issueDate  DateTime   @default(now())
+  dueDate    DateTime
+  returnDate DateTime?
+  status     BookStatus @default(ISSUED)
+  fine       Float?     @default(0)
+  createdAt  DateTime   @default(now())
+  book    Book    @relation(fields: [bookId], references: [id])
+  student Student @relation(fields: [studentId], references: [id])
+}
