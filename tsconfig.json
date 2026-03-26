@@ -14,7 +14,6 @@
     "jsx": "preserve",
     "incremental": true,
 
-    👇 ADD THIS PART 👇
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"]
