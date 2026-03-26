@@ -354,8 +354,10 @@ export default function StudentsPage() {
                     4. Upload the filled file here
                   </div>
                 </div>
-                <a href="/api/students/template" download style={{display:"block",textAlign:"center",background:G.pale,color:G.main,border:`1px solid ${G.main}`,borderRadius:10,padding:"10px",fontSize:13,fontWeight:700,textDecoration:"none",marginBottom:14}}>
-                  📥 Download Excel Template
+                <a href="/api/students/template" download style={{display:"block",textAlign:"center",background:"#d1fae5",
+color:"#059669",
+border:"1px solid #059669",borderRadius:10,padding:"10px",fontSize:13,fontWeight:700,textDecoration:"none",marginBottom:14}}>
+                  📥 Download Excel Templateb
                 </a>
                 <div style={{border:"2px dashed #d1fae5",borderRadius:12,padding:"24px",textAlign:"center",marginBottom:14}}>
                   <div style={{fontSize:13,color:"#6b7280",marginBottom:10}}>Select your filled Excel file</div>
