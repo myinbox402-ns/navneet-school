@@ -597,13 +597,14 @@ export default function GradesPage() {
               </select>
             )}
           </div>
-
-          <div style={{maxWidth:780,margin:"0 auto"}}>
-            {tab==="35"   && <RC_35   s={SAMPLE_35}/>}
-            {tab==="68"   && <RC_68   s={SAMPLE_68}/>}
-            {tab==="910"  && <RC_910  s={SAMPLE_910}/>}
-            {tab==="1112" && <RC_1112 s={sample1112}/>}
-          </div>
+          <div className="report-card" style={{maxWidth:780,margin:"0 auto"}}>
+          {tab==="35"   && <RC_35   s={SAMPLE_35}/>}
+          {tab==="68"   && <RC_68   s={SAMPLE_68}/>}
+          {tab==="910"  && <RC_910  s={SAMPLE_910}/>}
+          {tab==="1112" && <RC_1112 s={sample1112}/>}
+         </div>
+          
+          
         </main>
       </div>
 
